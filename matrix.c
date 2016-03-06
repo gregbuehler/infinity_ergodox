@@ -51,6 +51,8 @@ void matrix_init(void)
 
 uint8_t matrix_scan(void)
 {
+    systime_t beforeScan = chVTGetSystemTimeX();
+    systime_t sleepTime = 0;
     for (int row = 0; row < LOCAL_MATRIX_ROWS; row++) {
         matrix_row_t data = 0;
 
@@ -67,7 +69,9 @@ uint8_t matrix_scan(void)
             case 8: palSetPad(GPIOD, 0);    break;
         }
 
+		systime_t beforeSleep = chVTGetSystemTimeX();
         wait_us(1); // need wait to settle pin state
+        sleepTime += chVTGetSystemTimeX() - beforeSleep;
 
         // read col data: { PTD1, PTD4, PTD5, PTD6, PTD7 }
         data = ((palReadPort(GPIOD) & 0xF0) >> 3) |
@@ -99,6 +103,8 @@ uint8_t matrix_scan(void)
         }
         debouncing = false;
     }
+    systime_t afterScan = chVTGetSystemTimeX();
+    //xprintf("Delta %d sleep %d\n", afterScan - beforeScan, sleepTime);
     return 1;
 }
 

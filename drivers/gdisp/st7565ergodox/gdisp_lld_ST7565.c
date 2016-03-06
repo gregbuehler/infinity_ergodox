@@ -14,6 +14,7 @@
 #include "src/gdisp/gdisp_driver.h"
 
 #include "board_ST7565.h"
+#include "print.h"
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -150,6 +151,7 @@ LLDSPEC bool_t gdisp_lld_init(GDisplay *g) {
 #if GDISP_HARDWARE_FLUSH
 	LLDSPEC void gdisp_lld_flush(GDisplay *g) {
 		unsigned	p;
+		systime_t beforeScan = chVTGetSystemTimeX();
 
 		// Don't flush if we don't need it.
 		if (!(g->flags & GDISP_FLG_NEEDFLUSH))
@@ -170,6 +172,8 @@ LLDSPEC bool_t gdisp_lld_init(GDisplay *g) {
 		release_bus(g);
 
 		g->flags &= ~GDISP_FLG_NEEDFLUSH;
+		systime_t afterScan = chVTGetSystemTimeX();
+		xprintf("Scan time %d\n", afterScan - beforeScan);
 	}
 #endif
 
